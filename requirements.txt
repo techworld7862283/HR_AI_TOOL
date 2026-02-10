@@ -1,0 +1,27 @@
+# Core backend
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+en-core-web-sm
+# File processing
+pdf2docx
+python-docx
+PyPDF2
+pdfminer.six
+docx2pdf
+
+# Resume / HR parsing
+pandas
+numpy
+spacy
+scikit-learn
+sentence-transformers
+
+# Text-to-Speech
+gTTS
+
+# Optional utilities (safe to keep)
+requests
+tqdm
+uvicorn
