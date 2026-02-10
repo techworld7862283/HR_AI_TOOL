@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api import analytics
+import os
+from fastapi.staticfiles import StaticFiles
 
 
 # Import routers
@@ -27,15 +29,13 @@ app.include_router(bulk_rank.router, prefix="/api/bulk_rank")
 app.include_router(export.router, prefix="/api/export")
 app.include_router(jd_match.router, prefix="/api/jd_match")
 app.include_router(analytics.router, prefix="/api/analytics")
-@app.get("/")
-def root():
-    return {"status": "API is live 🚀"}
 
-@app.get("/health")
+frontend_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
+
+@app.get("/api/health")
 def health():
     return {"status": "ok"}
-
-import os
 import uvicorn
 
 if __name__ == "__main__":
@@ -46,5 +46,6 @@ if __name__ == "__main__":
         port=port,
         reload=False
     )
+
 
 
