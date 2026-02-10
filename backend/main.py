@@ -27,3 +27,7 @@ app.include_router(bulk_rank.router, prefix="/api/bulk_rank")
 app.include_router(export.router, prefix="/api/export")
 app.include_router(jd_match.router, prefix="/api/jd_match")
 app.include_router(analytics.router, prefix="/api/analytics")
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
