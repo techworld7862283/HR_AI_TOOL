@@ -1,4 +1,8 @@
-const backendURL = location.hostname === "localhost" ? "http://localhost:8000" : "";
+const backendURL =
+  location.hostname === "localhost"
+    ? "http://localhost:8000"
+    : "https://hr-ai-tool.onrender.com"
+;
 
 // --------- Tabs ----------
 document.querySelectorAll(".tab").forEach(tab => {
