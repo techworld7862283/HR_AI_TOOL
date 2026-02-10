@@ -3,7 +3,6 @@ fastapi
 uvicorn[standard]
 python-multipart
 pydantic
-en-core-web-sm
 # File processing
 pdf2docx
 python-docx
@@ -25,3 +24,4 @@ gTTS
 requests
 tqdm
 uvicorn
+
