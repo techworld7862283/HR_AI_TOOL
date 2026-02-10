@@ -27,6 +27,9 @@ app.include_router(bulk_rank.router, prefix="/api/bulk_rank")
 app.include_router(export.router, prefix="/api/export")
 app.include_router(jd_match.router, prefix="/api/jd_match")
 app.include_router(analytics.router, prefix="/api/analytics")
+@app.get("/")
+def root():
+    return {"status": "API is live 🚀"}
 
 @app.get("/health")
 def health():
@@ -43,4 +46,5 @@ if __name__ == "__main__":
         port=port,
         reload=False
     )
+
 
