@@ -1,7 +1,13 @@
 import re
 import spacy
 
-nlp = spacy.load("en_core_web_sm")
+_nlp = None
+
+def get_nlp():
+    global _nlp
+    if _nlp is None:
+        _nlp = spacy.load("en_core_web_sm")
+    return _nlp
 
 SKILLS_DB = {
     "python", "java", "sql", "machine learning", "deep learning",
@@ -10,7 +16,7 @@ SKILLS_DB = {
 }
 
 def parse_resume(text: str) -> dict:
-    doc = nlp(text.lower())
+    doc = get_nlp()(text.lower())
     email = re.findall(r"[a-z0-9\._%+-]+@[a-z0-9\.-]+\.[a-z]{2,}", text)
     phone = re.findall(r"\+?\d[\d\s\-]{8,}", text)
     skills = sorted({token.text for token in doc if token.text in SKILLS_DB})
@@ -36,4 +42,5 @@ def extract_text(file_path: str) -> str:
         return "\n".join(p.text for p in doc.paragraphs)
     else:
         raise ValueError("Unsupported file type")
+
 
