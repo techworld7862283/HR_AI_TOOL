@@ -5,6 +5,7 @@
 <title>Grand AI + HR Tool</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.tailwindcss.com"></script>
+
 <style>
 .drag-over { border-color:#2563eb; background-color:#eff6ff; }
 .tab { cursor:pointer; padding:.6rem 1.2rem; display:inline-block; border-bottom:3px solid transparent }
@@ -13,19 +14,21 @@
 .card { background:white; border-radius:0.75rem; padding:1.25rem; box-shadow:0 10px 25px rgba(0,0,0,.05) }
 </style>
 </head>
+
 <body class="bg-gradient-to-br from-gray-100 to-blue-50 min-h-screen">
 
 <div class="max-w-6xl mx-auto py-8 px-4">
-<h1 class="text-4xl font-extrabold text-center mb-8 text-gray-800">🚀 Grand AI + HR Tool</h1>
+<h1 class="text-4xl font-extrabold text-center mb-8 text-gray-800">
+🚀 Grand AI + HR Tool
+</h1>
 
 <!-- Tabs -->
-<div class="mb-8 text-center">
+<div class="mb-8 text-center space-x-2">
 <span class="tab tab-active" data-tab="pdf2word">PDF → Word</span>
 <span class="tab" data-tab="word2pdf">Word → PDF</span>
 <span class="tab" data-tab="resume">Resume / HR Analysis</span>
 <span class="tab" data-tab="tts">Text → Speech</span>
 <span class="tab" data-tab="analytics">Analytics</span>
-
 </div>
 
 <div id="tools-container">
@@ -33,45 +36,44 @@
 <!-- PDF → Word -->
 <div class="tool card" id="pdf2word">
 <label class="font-semibold mb-2 block">Upload PDF</label>
-<div id="pdfDrop" class="border-2 border-dashed p-6 text-center rounded-lg cursor-pointer">Drag & drop or click</div>
+<div id="pdfDrop" class="border-2 border-dashed p-6 text-center rounded-lg cursor-pointer">
+Drag & drop or click
+</div>
 <input type="file" id="pdfFile" hidden accept=".pdf">
-<button id="pdfBtn" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded button-disabled">Convert</button>
+<button id="pdfBtn" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded button-disabled">
+Convert
+</button>
 <div id="pdfResult" class="mt-3"></div>
 </div>
 
 <!-- Word → PDF -->
 <div class="tool card hidden" id="word2pdf">
 <label class="font-semibold mb-2 block">Upload DOCX</label>
-<div id="wordDrop" class="border-2 border-dashed p-6 text-center rounded-lg cursor-pointer">Drag & drop or click</div>
+<div id="wordDrop" class="border-2 border-dashed p-6 text-center rounded-lg cursor-pointer">
+Drag & drop or click
+</div>
 <input type="file" id="wordFile" hidden accept=".docx">
-<button id="wordBtn" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded button-disabled">Convert</button>
+<button id="wordBtn" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded button-disabled">
+Convert
+</button>
 <div id="wordResult" class="mt-3"></div>
 </div>
 
-<!-- Resume / HR Analysis -->
+<!-- Resume Analysis -->
 <div class="tool card hidden" id="resume">
 <label class="font-semibold mb-2 block">Upload Resume (PDF / DOCX / CSV)</label>
 <div id="resumeDrop" class="border-2 border-dashed p-6 text-center rounded-lg cursor-pointer">
 Drag & drop or click
 </div>
 <input type="file" id="resumeFile" hidden accept=".pdf,.docx,.csv">
-<button id="resumeAnalyzeBtn" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded button-disabled">
+
+<div class="mt-3 space-x-2">
+<button id="resumeAnalyzeBtn" class="bg-blue-600 text-white px-5 py-2 rounded button-disabled">
 Analyze Resume
 </button>
-<button id="resumeCsvBtn" class="mt-3 bg-green-600 text-white px-5 py-2 rounded">
+<button id="resumeCsvBtn" class="bg-green-600 text-white px-5 py-2 rounded">
 Download CSV
 </button>
-<div class="tool card hidden" id="analytics">
-  <h2 class="text-xl font-bold mb-4">📊 HR Analytics</h2>
-
-  <p><b>Total Candidates:</b> <span id="totalCandidates"></span></p>
-  <p><b>Average Score:</b> <span id="avgScore"></span></p>
-
-  <h3 class="mt-4 font-semibold">Skill Distribution</h3>
-  <div id="skillChart" class="space-y-2 mt-2"></div>
-
-  <h3 class="mt-4 font-semibold">Verdicts</h3>
-  <div id="verdictChart" class="space-y-2 mt-2"></div>
 </div>
 
 <!-- Score -->
@@ -83,7 +85,7 @@ Download CSV
 <p id="scoreText" class="mt-1 text-sm text-gray-700"></p>
 </div>
 
-<!-- Skills Heatmap -->
+<!-- Skills -->
 <div id="skillsContainer" class="mt-6 hidden">
 <p class="font-semibold mb-3">Skill Match Heatmap</p>
 <div id="skillHeatmap" class="space-y-2"></div>
@@ -94,10 +96,40 @@ Download CSV
 
 <!-- TTS -->
 <div class="tool card hidden" id="tts">
+
 <label class="font-semibold mb-2 block">Enter Text</label>
 <textarea id="ttsText" class="border rounded w-full p-3" rows="4"></textarea>
-<button id="ttsBtn" class="mt-3 bg-blue-600 text-white px-5 py-2 rounded">Convert to Speech</button>
-<div id="ttsResult" class="mt-3"></div>
+
+<label class="font-semibold mt-4 block">Select Voice</label>
+<select id="voiceSelect" class="border rounded w-full p-2">
+<option value="female_en_us">Female (US)</option>
+<option value="male_en_uk">Male (UK)</option>
+<option value="female_en_au">Female (AU)</option>
+<option value="male_en_in">Male (India)</option>
+</select>
+
+<button id="ttsBtn" class="mt-4 bg-blue-600 text-white px-5 py-2 rounded">
+Convert to Speech
+</button>
+
+<div id="ttsResult" class="mt-4"></div>
+
+</div>
+
+<!-- Analytics -->
+<div class="tool card hidden" id="analytics">
+
+<h2 class="text-xl font-bold mb-4">📊 HR Analytics</h2>
+
+<p><b>Total Candidates:</b> <span id="totalCandidates">0</span></p>
+<p><b>Average Score:</b> <span id="avgScore">0</span></p>
+
+<h3 class="mt-4 font-semibold">Skill Distribution</h3>
+<div id="skillChart" class="space-y-2 mt-2"></div>
+
+<h3 class="mt-4 font-semibold">Verdicts</h3>
+<div id="verdictChart" class="space-y-2 mt-2"></div>
+
 </div>
 
 </div>
