@@ -1,23 +1,81 @@
-from fastapi import APIRouter, Form, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Form, HTTPException
+from fastapi.responses import JSONResponse
 from gtts import gTTS
-import os, uuid
+import os
+import uuid
 
 router = APIRouter()
+
 OUTPUT_DIR = "backend/outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+
+# Available voices (Google TTS language variants)
+VOICE_OPTIONS = {
+    "female_en_us": {"lang": "en", "tld": "com"},
+    "male_en_uk": {"lang": "en", "tld": "co.uk"},
+    "female_en_au": {"lang": "en", "tld": "com.au"},
+    "male_en_in": {"lang": "en", "tld": "co.in"}
+}
+
+
 @router.post("/text_to_speech")
-async def text_to_speech(text: str = Form(...), background_tasks: BackgroundTasks = None):
+async def text_to_speech(
+    text: str = Form(...),
+    voice: str = Form("female_en_us")
+):
     if not text.strip():
-        raise HTTPException(400, "Text required")
+        raise HTTPException(status_code=400, detail="Text required")
+
+    if voice not in VOICE_OPTIONS:
+        raise HTTPException(status_code=400, detail="Invalid voice option")
+
     uid = str(uuid.uuid4())
-    mp3_path = os.path.join(OUTPUT_DIR, f"{uid}.mp3")
+    filename = f"{uid}.mp3"
+    mp3_path = os.path.join(OUTPUT_DIR, filename)
+
     try:
-        tts = gTTS(text=text, lang="en")
+        voice_config = VOICE_OPTIONS[voice]
+
+        tts = gTTS(
+            text=text,
+            lang=voice_config["lang"],
+            tld=voice_config["tld"]
+        )
+
         tts.save(mp3_path)
-        if background_tasks:
-            background_tasks.add_task(os.remove, mp3_path)
-        return FileResponse(mp3_path, media_type="audio/mpeg", filename="tts.mp3")
+
+        return JSONResponse({
+            "audio_url": f"/api/tts/play/{filename}",
+            "download_url": f"/api/tts/download/{filename}",
+            "voice_used": voice
+        })
+
     except Exception as e:
-        raise HTTPException(500, f"TTS failed: {e}")
+        raise HTTPException(status_code=500, detail=f"TTS failed: {e}")
+
+
+@router.get("/play/{filename}")
+async def play_audio(filename: str):
+    file_path = os.path.join(OUTPUT_DIR, filename)
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    from fastapi.responses import FileResponse
+    return FileResponse(file_path, media_type="audio/mpeg")
+
+
+@router.get("/download/{filename}")
+async def download_audio(filename: str):
+    file_path = os.path.join(OUTPUT_DIR, filename)
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    from fastapi.responses import FileResponse
+    return FileResponse(
+        file_path,
+        media_type="audio/mpeg",
+        filename="tts.mp3"
+    )
