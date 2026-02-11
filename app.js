@@ -29,14 +29,92 @@ function drag(drop, input, btn) {
   let file = null;
 
   drop.onclick = () => input.click();
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add("drag-over"); };
+  drop.ondragleave = () => drop.classList.remove("drag-over");
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove("drag-over"); handle(e.dataTransfer.files[0]); };
+  input.onchange = e => handle(e.target.files[0]);
 
-  input.onchange = e => {
-    file = e.target.files[0];
+  function handle(f) {
+    file = f;
     btn.classList.toggle("button-disabled", !file);
-  };
+  }
 
   return () => file;
 }
+
+/* ---------------- PDF → Word ---------------- */
+const getPdf = drag(
+  document.getElementById("pdfDrop"),
+  document.getElementById("pdfFile"),
+  document.getElementById("pdfBtn")
+);
+
+pdfBtn.onclick = async () => {
+  const file = getPdf();
+  if (!file) return;
+
+  const fd = new FormData();
+  fd.append("file", file);
+
+  try {
+    const r = await fetch(`${backendURL}/api/pdf/pdf_to_word`, {
+      method: "POST",
+      body: fd
+    });
+
+    if (!r.ok) throw new Error("PDF→Word failed");
+
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "converted.docx";
+    a.textContent = "Download PDF→Word";
+
+    const pdfResult = document.getElementById("pdfResult");
+    pdfResult.innerHTML = "";
+    pdfResult.appendChild(a);
+
+  } catch {
+    alert("PDF → Word conversion failed.");
+  }
+};
+
+/* ---------------- Word → PDF ---------------- */
+const getWord = drag(
+  document.getElementById("wordDrop"),
+  document.getElementById("wordFile"),
+  document.getElementById("wordBtn")
+);
+
+wordBtn.onclick = async () => {
+  const file = getWord();
+  if (!file) return;
+
+  const fd = new FormData();
+  fd.append("file", file);
+
+  try {
+    const r = await fetch(`${backendURL}/api/word/word-to-pdf`, {
+      method: "POST",
+      body: fd
+    });
+
+    if (!r.ok) throw new Error("Word→PDF failed");
+
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "converted.pdf";
+    a.textContent = "Download Word→PDF";
+
+    const wordResult = document.getElementById("wordResult");
+    wordResult.innerHTML = "";
+    wordResult.appendChild(a);
+
+  } catch {
+    alert("Word → PDF conversion failed.");
+  }
+};
 
 /* ---------------- RESUME ANALYSIS ---------------- */
 const getResume = drag(
@@ -91,18 +169,15 @@ resumeAnalyzeBtn.onclick = async () => {
 
     Object.entries(data.skills || {}).forEach(([skill, value]) => {
       const div = document.createElement("div");
-      div.className =
-        "p-2 rounded text-white text-sm font-medium";
-      div.style.background =
-        `rgb(${255 - value * 2}, ${value * 2}, 120)`;
+      div.className = "p-2 rounded text-white text-sm font-medium";
+      div.style.background = `rgb(${255 - value * 2}, ${value * 2}, 120)`;
       div.textContent = `${skill}: ${value}%`;
       skillHeatmap.appendChild(div);
     });
 
-    document.getElementById("resumeResult").textContent =
-      data.summary || "";
+    document.getElementById("resumeResult").textContent = data.summary || "";
 
-  } catch (err) {
+  } catch {
     alert("Resume analysis failed.");
   }
 };
@@ -121,10 +196,7 @@ resumeCsvBtn.onclick = async () => {
       body: fd
     });
 
-    if (!r.ok) {
-      alert("CSV generation failed.");
-      return;
-    }
+    if (!r.ok) throw new Error("CSV generation failed");
 
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
@@ -148,7 +220,7 @@ ttsBtn.onclick = async () => {
 
   const fd = new FormData();
   fd.append("text", ttsText.value);
-  fd.append("voice", document.getElementById("voiceSelect").value);
+  fd.append("voice", document.getElementById("voiceSelect")?.value || "female1");
 
   try {
     const r = await fetch(`${backendURL}/api/tts/text_to_speech`, {
@@ -178,9 +250,7 @@ ttsBtn.onclick = async () => {
 
 /* ---------------- ANALYTICS ---------------- */
 async function loadAnalyticsFromHistory() {
-
-  const candidates =
-    JSON.parse(localStorage.getItem("analytics_candidates") || "[]");
+  const candidates = JSON.parse(localStorage.getItem("analytics_candidates") || "[]");
 
   if (!candidates.length) {
     document.getElementById("skillChart").innerHTML =
@@ -199,28 +269,19 @@ async function loadAnalyticsFromHistory() {
 
     const data = await r.json();
 
-    document.getElementById("totalCandidates").textContent =
-      data.total_candidates || 0;
-
-    document.getElementById("avgScore").textContent =
-      data.average_match_score || 0;
+    document.getElementById("totalCandidates").textContent = data.total_candidates || 0;
+    document.getElementById("avgScore").textContent = data.average_match_score || 0;
 
     const skillChart = document.getElementById("skillChart");
     skillChart.innerHTML = "";
-
     Object.entries(data.skill_distribution || {}).forEach(([k, v]) => {
-      skillChart.innerHTML +=
-        `<div class="bg-blue-100 p-2 rounded">${k}: ${v}</div>`;
+      skillChart.innerHTML += `<div class="bg-blue-100 p-2 rounded">${k}: ${v}</div>`;
     });
 
-    const verdictChart =
-      document.getElementById("verdictChart");
-
+    const verdictChart = document.getElementById("verdictChart");
     verdictChart.innerHTML = "";
-
     Object.entries(data.verdict_distribution || {}).forEach(([k, v]) => {
-      verdictChart.innerHTML +=
-        `<div class="bg-green-100 p-2 rounded">${k}: ${v}</div>`;
+      verdictChart.innerHTML += `<div class="bg-green-100 p-2 rounded">${k}: ${v}</div>`;
     });
 
   } catch {
