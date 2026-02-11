@@ -8,6 +8,7 @@ pdf2docx
 python-docx
 PyPDF2
 pdfminer.six
+reportlab>=3.6.0
 docx2pdf
 
 # Resume / HR parsing
@@ -24,4 +25,5 @@ gTTS
 requests
 tqdm
 uvicorn
+
 
